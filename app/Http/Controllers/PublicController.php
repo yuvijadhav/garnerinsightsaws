@@ -20,26 +20,50 @@ use App\FrontReport;
 use App\FrontReportdetail;
 
 class PublicController extends Controller {
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getebs() {
         $sub_categories = SubCategory::all();
         return view('public.ebs1')->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function postebs() {
         $sub_categories = SubCategory::all();
         return view('public.ebs2')->with('$sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function checkout() {
         $sub_categories = SubCategory::all();
         return view('public.checkout')->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function checkoutEBS() {
         $sub_categories = SubCategory::all();
         return view('public.checkoutEBS')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getHome() {
         /* $sub_categories=SubCategory::all();
@@ -49,6 +73,11 @@ class PublicController extends Controller {
 //        dd($report);
         return view("public.index")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getAboutus() {
         $sub_categories = SubCategory::all();
@@ -60,10 +89,20 @@ class PublicController extends Controller {
         return view("faq")->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getContact() {
         $sub_categories = SubCategory::all();
         return view("contact")->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function postContact(Request $request) {
         // $ip= $request->getClientIp();
@@ -79,6 +118,11 @@ class PublicController extends Controller {
         return redirect('thank-you');
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function postQuote(Request $request) {
         // $ip= $request->getClientIp();
         $ip = \Request::getClientIp(true);
@@ -91,61 +135,121 @@ class PublicController extends Controller {
         return redirect('thank-you');
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getabout() {
         $sub_categories = SubCategory::all();
         return view("about-us")->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getTermsAndCondition() {
         $sub_categories = SubCategory::all();
         return view("terms-and-condition")->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getReturnPolicy() {
         $sub_categories = SubCategory::all();
         return view("return-policy")->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getPrivacyPolicy() {
         $sub_categories = SubCategory::all();
         return view("privacy-policy")->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getDisclaimer() {
         $sub_categories = SubCategory::all();
         return view("disclaimer")->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getHowtoOrder() {
         $sub_categories = SubCategory::all();
         return view("how-to-order")->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getDelivery() {
         $sub_categories = SubCategory::all();
         return view("delivery")->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getSitemap() {
         $sub_categories = SubCategory::all();
         return view("sitemap")->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getcheckout() {
         $sub_categories = SubCategory::all();
         return view('public.checkout')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getPaymentMethods(Request $request) {
         $sub_categories = SubCategory::all();
         return view('public.payment-methods')->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getServices() {
         $sub_categories = SubCategory::all();
         $report = FrontReport::where('status', '1')->with('subCategory')->orderBy('report_id', 'desc')->take(5)->get();
         return view("public.services")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function postNewsletter(Request $request) {
         $sub_categories = SubCategory::all();
@@ -158,6 +262,11 @@ class PublicController extends Controller {
         return view('public.index')->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getArticles(Request $request) {
         $sub_categories = SubCategory::all();
         $data = Article::take(10)->orderBy('created_at', 'desc')->get();
@@ -165,6 +274,11 @@ class PublicController extends Controller {
         $report = FrontReport::where('status', 1)->with("subCategory")->orderBy('report_id', 'desc')->take(10)->get();
         return view('public.pressRelease')->with('data', $data)->with('total_count', $total_count)->with("report", $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getArticlesData(Request $request) {
         $post = $request->all();
@@ -177,6 +291,11 @@ class PublicController extends Controller {
         return $data;
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getNews(Request $request) {
         $sub_categories = SubCategory::all();
         $data = News::take(10)->get();
@@ -184,6 +303,11 @@ class PublicController extends Controller {
         $report = FrontReport::where('status', 1)->with('subCategory')->orderBy('report_id', 'desc')->take(10)->get();
         return view('public.blogs')->with('data', $data)->with('total_count', $total_count)->with("report", $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     //ajax
     public function getNewsData(Request $request) {
@@ -196,6 +320,11 @@ class PublicController extends Controller {
         return $data;
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getReports(Request $request) {
         $sub_categories = SubCategory::all();
 //          $report = FrontReport::where('status', 1)->where("url", $url)->with("publisher")->with("subCategory")->with("region")->with("reportdetails")->first();
@@ -206,6 +335,11 @@ class PublicController extends Controller {
         $total_count = FrontReport::where('status', 1)->count();
         return view('public.reports')->with('data', $data)->with("categories", $categories)->with("regions", $regions)->with('total_count', $total_count)->with("sub_category_id", "0")->with("search", "")->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     //Ajax
     public function getReportsData(Request $request) {
@@ -232,6 +366,11 @@ class PublicController extends Controller {
         return $data;
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getCategories(Request $request) {
         $sub_categories = SubCategory::all();
         $data = SubCategory::all();
@@ -239,6 +378,11 @@ class PublicController extends Controller {
         $report = FrontReport::where('status', 1)->with('subCategory')->take(5)->get();
         return view('public.category')->with('data', $data)->with('total_count', $total_count)->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     //ajax
     public function getCategoryData(Request $request) {
@@ -250,6 +394,11 @@ class PublicController extends Controller {
         $data = array("total_count" => $total_count, "data" => $data);
         return $data;
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function postAddEnquiryReport(Request $request) {
         $this->validate($request, EnquiryReport::$rules);
@@ -318,6 +467,11 @@ class PublicController extends Controller {
         return redirect('thank-you');
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function postAddEnquiry(Request $request) {
         $this->validate($request, EnquiryReport::$rules1);
         $post = $request->all();
@@ -370,6 +524,11 @@ class PublicController extends Controller {
         return redirect('thank-you');
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getReportDetailsOLD($url) {
         $sub_categories = SubCategory::all();
 
@@ -401,6 +560,8 @@ class PublicController extends Controller {
     }
 
     /*
+     * ================================ 
+     * 
      * OLd functionaliy 
      */
 
@@ -443,6 +604,11 @@ class PublicController extends Controller {
         }
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getReportDetails($url) {
 //        dd($url);
         $sub_categories = SubCategory::all();
@@ -482,6 +648,11 @@ class PublicController extends Controller {
         }
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getNewsDetails(Request $request) {
         $sub_categories = SubCategory::all();
         $news_id = $request->url;
@@ -490,6 +661,11 @@ class PublicController extends Controller {
         $relatedNews = News::where("news_id", "!=", $news->news_id)->take(5)->get();
         return view('news.blogDetails')->with('news', $news)->with('relatedNews', $relatedNews)->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getArticleDetails(Request $request) {
         $sub_categories = SubCategory::all();
@@ -501,6 +677,11 @@ class PublicController extends Controller {
         return view('article.pressReleaseDetails')->with('article', $article)->with('relatedArticle', $relatedArticle)->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getCategoryDetails(Request $request) {
         $sub_categories = SubCategory::all();
         $sub_category_id = $_GET['id'];
@@ -510,10 +691,20 @@ class PublicController extends Controller {
         return view('public.categoryDetails')->with('sub_category', $sub_category)->with('relatedCategory', $relatedCategory)->with('report', $report)->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getFormatnDelivery(Request $request) {
         $sub_categories = SubCategory::all();
         return view('formatsndelivery')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function postReports(Request $request) {
         $sub_categories = SubCategory::all();
@@ -524,7 +715,10 @@ class PublicController extends Controller {
         if (isset($search)) {
             $reports = $reports->where('report_title', 'like', "%" . $search . "%");
         }
-
+        /*
+         * ================================ 
+         * 
+         */
         if (isset($sub_category_id)) {
             $reports = $reports->where('sub_category_id', $sub_category_id);
         } else {
@@ -539,6 +733,11 @@ class PublicController extends Controller {
 
         return view('public.reports')->with('sub_category_id', $sub_category_id)->with('data', $reports)->with('categories', $categories)->with('regions', $regions)->with('total_count', $total_count)->with('search', $search)->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getCategory($url) {
         $category = SubCategory::where('sub_category_description', $url)->first();
@@ -558,34 +757,69 @@ class PublicController extends Controller {
         }
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getHeader(Request $request) {
         return view('layouts.header');
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getCategorMenu(Request $request) {
         $sub_categories = SubCategory::all();
         return $sub_categories;
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getPaymentSuccess(Request $request) {
         $sub_categories = SubCategory::all();
         return view('mail.paymentSuccess')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function postPaymentSuccess(Request $request) {
         $sub_categories = SubCategory::all();
         return view('mail.paymentSuccess')->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getCancelPayment(Request $request) {
         $sub_categories = SubCategory::all();
         return view('mail.paymentCancel')->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function postCancelPayment(Request $request) {
         $sub_categories = SubCategory::all();
         return view('mail.paymentCancel')->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function siteMapReport(Request $request) {
         $sub_categories = SubCategory::all();
@@ -593,17 +827,32 @@ class PublicController extends Controller {
         return view('report.siteMapReports')->with('reports', $reports)->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function siteMapPressRelease(Request $request) {
         $sub_categories = SubCategory::all();
         $articles = Article::orderBy('created_at', 'desc')->get();
         return view('public.siteMapPressRelease')->with('articles', $articles)->with('sub_categories', $sub_categories);
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function siteMapBlog() {
         $sub_categories = SubCategory::all();
         $news = News::orderBy('created_at', 'desc')->get();
         return view('public.siteMapBlog')->with('news', $news)->with('sub_categories', $sub_categories);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getThankyou(Request $request) {
 //        dd($request);
@@ -613,6 +862,11 @@ class PublicController extends Controller {
         $report = array();
         return view('public.thankYou')->with('report', $report);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function clearSession() {
 //        $result = mysql_query("SHOW FULL PROCESSLIST");
