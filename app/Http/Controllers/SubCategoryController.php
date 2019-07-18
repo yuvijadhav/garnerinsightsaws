@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Category;
-use App\SubCategory;
+use App\Models\SubCategory;
 
 class SubCategoryController extends Controller {
     /*

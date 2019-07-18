@@ -43,10 +43,6 @@ Route::get('/cancelPayment', 'PublicController@getCancelPayment');
 Route::post('/cancelPayment', 'PublicController@postCancelPayment');
 
 //End Payment
-
-
-
-
 //Pages Routes
 Route::get('/', 'frontend\PageController@getHome');
 Route::get('/home', 'frontend\PageController@getHome');
@@ -194,3 +190,7 @@ Route::group(['middleware' => ['web']], function() {
 });
 
 Route::get('/{url}', 'PublicController@getReportDetails');
+Route::get('/clear-cache', function() {
+    Artisan::call('cache:clear');
+    return "Cache is cleared";
+});

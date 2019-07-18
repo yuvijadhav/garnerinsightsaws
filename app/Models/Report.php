@@ -9,15 +9,15 @@ class Report extends Model {
     public $primaryKey = "report_id";
 
     public function subCategory() {
-        return $this->belongsTo('App\SubCategory', 'sub_category_id', 'sub_category_id');
+        return $this->belongsTo('App\Models\SubCategory', 'sub_category_id', 'sub_category_id');
     }
 
     public function publisher() {
-        return $this->belongsTo('App\Publisher', 'publisher_id', 'publisher_id');
+        return $this->belongsTo('App\Models\Publisher', 'publisher_id', 'publisher_id');
     }
 
     public function region() {
-        return $this->belongsTo('App\Region', 'region_id', 'region_id');
+        return $this->belongsTo('App\Models\Region', 'region_id', 'region_id');
     }
 
     public static $reportRule = [
