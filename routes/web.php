@@ -29,47 +29,78 @@ Route::get('migratereport/{offset}', 'RndController@insertDataFunction');
 Route::post('pa1', function () {
     return view('report.PHP_VPC_3Party_Order_DO');
 });
-Route::get('/', 'PublicController@getHome');
+//Payment Routes
+Route::get('payment-methods', 'PublicController@getPaymentMethods');
 Route::post('postPayment', 'ReportController@postPayment');
 Route::post('paymentGateway', 'ReportController@paymentGateway');
 Route::get('/checkout', 'PublicController@checkout');
 Route::get('/checkoutebs', 'PublicController@checkoutEBS');
 Route::get('/ebs1', 'PublicController@getebs');
 Route::post('/ebs2', 'PublicController@postebs');
-Route::get('/home', 'PublicController@getHome');
-Route::get('/about-us', 'PublicController@getAboutus');
-Route::get('/help.htm', 'PublicController@getFaq');
+Route::get('/paymentSuccess', 'PublicController@getPaymentSuccess');
+Route::post('/paymentSuccess', 'PublicController@postPaymentSuccess');
+Route::get('/cancelPayment', 'PublicController@getCancelPayment');
+Route::post('/cancelPayment', 'PublicController@postCancelPayment');
+
+//End Payment
+
+
+
+
+//Pages Routes
+Route::get('/', 'frontend\PageController@getHome');
+Route::get('/home', 'frontend\PageController@getHome');
+Route::get('/about-us', 'frontend\PageController@getabout');
+Route::get('/services', 'frontend\PageController@getServices');
+Route::get('/faq', 'frontend\PageController@getFaq');
+Route::get('/terms-and-condition', 'frontend\PageController@getTermsAndCondition');
+Route::get('/return-policy', 'frontend\PageController@getReturnPolicy');
+Route::get('/privacy-policy', 'frontend\PageController@getPrivacyPolicy');
+Route::get('/disclaimer', 'frontend\PageController@getDisclaimer');
+Route::get('/how-to-order', 'frontend\PageController@getHowtoOrder');
+Route::get('/delivery', 'frontend\PageController@getDelivery');
+Route::get('formats-and-delivery', 'frontend\PageController@getFormatnDelivery');
+
 Route::get('/contact', 'PublicController@getContact');
 Route::post('/contact', 'PublicController@postContact');
+
 Route::post('quote', 'PublicController@postQuote');
-Route::get('/about-us', 'PublicController@getabout');
-Route::get('/faq', 'PublicController@getFaq');
-Route::get('/terms-and-condition', 'PublicController@getTermsAndCondition');
-Route::get('/return-policy', 'PublicController@getReturnPolicy');
-Route::get('/privacy-policy', 'PublicController@getPrivacyPolicy');
-Route::get('/disclaimer', 'PublicController@getDisclaimer');
-Route::get('/how-to-order', 'PublicController@getHowtoOrder');
-Route::get('/delivery', 'PublicController@getDelivery');
-Route::get('/sitemap', 'PublicController@getSitemap');
-Route::get('formats-and-delivery', 'PublicController@getFormatnDelivery');
-Route::get('/services', 'PublicController@getServices');
-Route::post('/newsletter', 'PublicController@postNewsletter');
-Route::post('reports', 'PublicController@postReports');
-Route::get('/categories/{url}', 'PublicController@getCategory');
-Route::get('header', 'PublicController@getHeader');
-Route::get('payment-methods', 'PublicController@getPaymentMethods');
+
+
+
+
 //Public Article
 Route::get('/press-release', 'PublicController@getArticles');
 Route::get('/articleData', 'PublicController@getArticlesData');
+
+Route::get('blog/{url}', 'PublicController@getNewsDetails');
+Route::get('press-release/{url}', 'PublicController@getArticleDetails');
 
 //Public News
 Route::get('/blogs', 'PublicController@getNews');
 Route::get('/newsData', 'PublicController@getNewsData');
 
+
+//Sitemap
+Route::get('/sitemap', 'PublicController@getSitemap');
+Route::get('sitemap_reports1', 'PublicController@siteMapReport');
+Route::get('sitemap_press_release1', 'PublicController@siteMapPressRelease');
+Route::get('sitemap_blogs1', 'PublicController@siteMapBlog');
+
+Route::post('/newsletter', 'PublicController@postNewsletter');
+
+
+Route::get('header', 'PublicController@getHeader');
+
+
+
 //Public Reports
-Route::get('categoryReports', 'PublicController@getCategoryReports');
+
 Route::get('/reports', 'PublicController@getReports');
 Route::get('/reportsData', 'PublicController@getReportsData');
+Route::post('reports', 'PublicController@postReports');
+Route::get('thank-you', 'ReportController@getThankyou');
+
 
 //Euquiry Report
 Route::post('/addEnquiryReport', 'PublicController@postAddEnquiryReport');
@@ -77,26 +108,18 @@ Route::post('addEnquiry', 'PublicController@postAddEnquiry');
 Route::get('relatedReports', 'PublicController@getRelatedReports');
 
 //Details Page
-Route::get('blog/{url}', 'PublicController@getNewsDetails');
-Route::get('press-release/{url}', 'PublicController@getArticleDetails');
 //Route::get('categoryDetails','PublicController@getCategoryDetails');
 //Public Categories
+Route::get('/categories/{url}', 'PublicController@getCategory');
+Route::get('categoryReports', 'PublicController@getCategoryReports');
 Route::get('/categories', 'PublicController@getCategories');
 Route::get('/categoryData', 'PublicController@getCategoryData');
 Route::get('categoryMenu', 'PublicController@getCategorMenu');
 
-//sidebar
-Route::get('publicSidebar', 'PublicController@publicSidebar');
 
 
-Route::get('/paymentSuccess', 'PublicController@getPaymentSuccess');
-Route::post('/paymentSuccess', 'PublicController@postPaymentSuccess');
-Route::get('/cancelPayment', 'PublicController@getCancelPayment');
-Route::post('/cancelPayment', 'PublicController@postCancelPayment');
 
-Route::get('sitemap_reports1', 'PublicController@siteMapReport');
-Route::get('sitemap_press_release1', 'PublicController@siteMapPressRelease');
-Route::get('sitemap_blogs1', 'PublicController@siteMapBlog');
+
 
 
 Auth::routes();
@@ -169,5 +192,5 @@ Route::group(['middleware' => ['web']], function() {
     Route::post('editRegion', ['middleware' => 'auth', 'uses' => 'RegionController@postEditRegion']);
     Route::get('deleteRegion', ['middleware' => 'auth', 'uses' => 'RegionController@getDeleteRegion']);
 });
-Route::get('thank-you', 'ReportController@getThankyou');
+
 Route::get('/{url}', 'PublicController@getReportDetails');

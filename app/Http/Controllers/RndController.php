@@ -109,6 +109,11 @@ class RndController extends Controller {
         echo $end;
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function insertdatainreportUrlTable($singleRecords) {
 
 
@@ -120,6 +125,11 @@ class RndController extends Controller {
         $reporturl->url = $rarray['url'];
         $reporturl->save();
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getlivedata($offset, $limit) {
 
@@ -148,6 +158,11 @@ class RndController extends Controller {
 //            print_r(json_decode($response));
         }
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function disconnectdb() {
         $queries = DB::connection('mysql');

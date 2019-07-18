@@ -3,24 +3,33 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Report;
-use App\SubCategory;
-use App\Publisher;
+use App\Models\Report;
+use App\Models\SubCategory;
+use App\Models\Publisher;
 use Illuminate\Support\Facades\Input;
 use Excel;
-use App\Region;
+use App\Models\Region;
 use Softon\Indipay\Facades\Indipay;
-use App\FrontReport;
-use App\FrontReportdetail;
+use App\Models\FrontReport;
+use App\Models\FrontReportdetail;
 use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller {
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getAxisPayReturn(Request $request) {
         $post = $request->all();
         print_r($post);
         return view('payment.pay-return');
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getAddReport(Request $request) {
 //        $report = Report::all();
@@ -31,6 +40,11 @@ class ReportController extends Controller {
         $region = Region::all();
         return view('report.addReport')->with('report', $report)->with('sub_category', $sub_category)->with('publisher', $publisher)->with('region', $region);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getAllReports(Request $request) {
         $data = FrontReport::with('subCategory')->orderBy('report_id', 'desc');
@@ -45,6 +59,11 @@ class ReportController extends Controller {
     }
 
 //Ajax
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getAllReportData(Request $request) {
         $post = $request->all();
         $search = $request->search;
@@ -60,6 +79,11 @@ class ReportController extends Controller {
         $data = array("total_count" => $total_count, "data" => $data);
         return $data;
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function getEditReport(Request $request) {
         if (isset($_GET['id'])) {
@@ -108,6 +132,11 @@ class ReportController extends Controller {
         return redirect('allReports');
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getDeleteReport(Request $request) {
         if (isset($_GET['id'])) {
             $report_id = $_GET['id'];
@@ -119,9 +148,19 @@ class ReportController extends Controller {
         return redirect('allReports');
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getUploadFile() {
         return view('report.uploadFile');
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function postAddReport(Request $request) {
         $post = $request->all();
@@ -186,6 +225,11 @@ class ReportController extends Controller {
         flash('Report has been added successfully', 'success')->important();
         return redirect('allReports');
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function postUploadFile(Request $request) {
 //        $this->validate($request, ["upload_file" => 'required|mimes:xlsx']);
@@ -375,6 +419,11 @@ class ReportController extends Controller {
      * End here
      */
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function postPayment(Request $request) {
         $sub_categories = SubCategory::all();
         $post = $request->all();
@@ -406,6 +455,11 @@ class ReportController extends Controller {
         //     return Indipay::process($order);
         // }
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function paymentGateway(Request $request) {
         $post = $request->all();
@@ -457,6 +511,11 @@ class ReportController extends Controller {
         }
     }
 
+    /*
+     * ================================ 
+     * 
+     */
+
     public function getThankyou(Request $request) {
 //        dd($request);
 //        $sub_categories = SubCategory::all();
@@ -465,6 +524,11 @@ class ReportController extends Controller {
         $report = array();
         return view('public.thankYou')->with('report', $report);
     }
+
+    /*
+     * ================================ 
+     * 
+     */
 
     public function cleanNonAsciiCharactersInString($orig_text) {
 

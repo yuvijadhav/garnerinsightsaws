@@ -5,19 +5,19 @@ namespace App\Http\Controllers;
 use Symfony\Component\HttpFoundation\Request;
 // Use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Article;
-use App\News;
-use App\Report;
-use App\Category;
-use App\SubCategory;
-use App\Publisher;
-use App\Newsletter;
-use App\Region;
-use App\EnquiryReport;
+use App\Models\Article;
+use App\Models\News;
+use App\Models\Report;
+use App\Models\Category;
+use App\Models\SubCategory;
+use App\Models\Publisher;
+use App\Models\Newsletter;
+use App\Models\Region;
+use App\Models\EnquiryReport;
 use Weboap\Visitor\Visitor;
-use App\ReportUrl;
-use App\FrontReport;
-use App\FrontReportdetail;
+use App\Models\ReportUrl;
+use App\Models\FrontReport;
+use App\Models\FrontReportdetail;
 
 class PublicController extends Controller {
     /*
