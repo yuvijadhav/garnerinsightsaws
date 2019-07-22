@@ -105,7 +105,7 @@ class PublicController extends Controller {
      */
 
     public function postContact(Request $request) {
-        // $ip= $request->getClientIp();
+// $ip= $request->getClientIp();
         $ip = \Request::getClientIp(true);
         $name = $request->name;
         $email = $request->email;
@@ -114,7 +114,7 @@ class PublicController extends Controller {
         $subject = $request->subject;
         $message = $request->message;
         $object = array('name' => $name, 'email' => $email, 'mobile' => $mobile, 'city' => $city, 'subject' => $subject, 'text' => $message, 'filename' => 'contact', 'ip' => $ip);
-        //$this->sendHtmlMail2($object);
+//$this->sendHtmlMail2($object);
         return redirect('thank-you');
     }
 
@@ -124,14 +124,14 @@ class PublicController extends Controller {
      */
 
     public function postQuote(Request $request) {
-        // $ip= $request->getClientIp();
+// $ip= $request->getClientIp();
         $ip = \Request::getClientIp(true);
         $name = $request->name;
         $email = $request->email;
         $mobile = $request->mobile;
         $message = $request->message;
         $object = array('name' => $name, 'email' => $email, 'mobile' => $mobile, 'text' => $message, 'filename' => 'quote', 'ip' => $ip);
-        //$this->sendHtmlMail3($object);
+//$this->sendHtmlMail3($object);
         return redirect('thank-you');
     }
 
@@ -309,7 +309,7 @@ class PublicController extends Controller {
      * 
      */
 
-    //ajax
+//ajax
     public function getNewsData(Request $request) {
         $post = $request->all();
         $page = $post['active_page'];
@@ -341,7 +341,7 @@ class PublicController extends Controller {
      * 
      */
 
-    //Ajax
+//Ajax
     public function getReportsData(Request $request) {
         $sub_categories = SubCategory::all();
         $post = $request->all();
@@ -384,7 +384,7 @@ class PublicController extends Controller {
      * 
      */
 
-    //ajax
+//ajax
     public function getCategoryData(Request $request) {
         $post = $request->all();
         $page = $post['active_page'];
@@ -402,7 +402,7 @@ class PublicController extends Controller {
 
     public function postAddEnquiryReport(Request $request) {
         $this->validate($request, EnquiryReport::$rules);
-        // $ip= $request->getClientIp();
+// $ip= $request->getClientIp();
         $ip = \Request::getClientIp(true);
         $post = $request->all();
         $report_id = $post['report_id'];
@@ -431,7 +431,7 @@ class PublicController extends Controller {
         $Array['message'] = $object['description'];
         $Array['report'] = $object['report_title'];
         $Array['region'] = $res->continent;
-        // $Array['continent'] = $res['continent'];
+// $Array['continent'] = $res['continent'];
         $Array['ip'] = $object['ip'];
         $Array['website'] = "garnerinsights.com";
         $Array['source'] = $object['source'];
@@ -463,7 +463,7 @@ class PublicController extends Controller {
 //        $output = curl_exec($ch);
 //        curl_close($ch);
         $this->sendHtmlMail($object);
-        //flash('Enqury sent successfully','success')->important();
+//flash('Enqury sent successfully','success')->important();
         return redirect('thank-you');
     }
 
@@ -520,7 +520,7 @@ class PublicController extends Controller {
 
 
         $this->sendHtmlMail1($object);
-        //flash('Enqury sent successfully','success')->important();
+//flash('Enqury sent successfully','success')->important();
         return redirect('thank-you');
     }
 
