@@ -10,16 +10,34 @@
 <head>
     <script type="text/javascript">
 
-        function chooseCategory(data){
-            var id=data;
+        function chooseCategory(data) {
+            var id = data;
             console.log(data);
-            var x=document.getElementById("id1").submit();
+            var x = document.getElementById("id1").submit();
         }
 
     </script>
     <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/5186043.js"></script>
     <!-- Yandex.Metrika counter --> 
-    <script type="text/javascript" > (function (d, w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter50853775 = new Ya.Metrika2({ id:50853775, clickmap:true, trackLinks:true, accurateTrackBounce:true, webvisor:true, trackHash:true }); } catch(e) { } }); var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () { n.parentNode.insertBefore(s, n); }; s.type = "text/javascript"; s.async = true; s.src = "https://cdn.jsdelivr.net/npm/yandex-metrica-watch/tag.js"; if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); } })(document, window, "yandex_metrika_callbacks2"); </script> <!-- /Yandex.Metrika counter -->
+    <script type="text/javascript" > (function (d, w, c) {
+            (w[c] = w[c] || []).push(function () {
+                try {
+                    w.yaCounter50853775 = new Ya.Metrika2({id: 50853775, clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true, trackHash: true});
+                } catch (e) {
+                }
+            });
+            var n = d.getElementsByTagName("script")[0], s = d.createElement("script"), f = function () {
+                n.parentNode.insertBefore(s, n);
+            };
+            s.type = "text/javascript";
+            s.async = true;
+            s.src = "https://cdn.jsdelivr.net/npm/yandex-metrica-watch/tag.js";
+            if (w.opera == "[object Opera]") {
+                d.addEventListener("DOMContentLoaded", f, false);
+            } else {
+                f();
+            }
+        })(document, window, "yandex_metrika_callbacks2");</script> <!-- /Yandex.Metrika counter -->
     <meta name ="Naver-Site-Verification" Content = "987e76b56400f980fb0fea53b007586bc8890b8e" />
     <style type="text/css">
         .calibri{
@@ -72,7 +90,7 @@
     <div class="container" style="padding-bottom: 40px;">
         <div class="col-lg-12 col-md-12 col-xs-12 no-padding" style="margin-bottom: 30px; margin-top:30px;">  
             <div class="col-lg-12 col-md-12" align="center">
-                <strong align="center blck" style="font-family:'Arial black';font-size:30;color:#555F6B">Popular Categories</strong><br>
+                <strong align="center blck" style="font-family:'Arial black';font-size:30px;color:#555F6B">Popular Categories</strong><br>
 
             </div>
         </div>
@@ -182,21 +200,21 @@
     <div class="container ">
         <div class="row col-md-12" align="center" style="margin-top:30px; font-family:'arial';">
 
-           <h2> <strong id="new-index-title " class="content-title">Latest Reports</strong><br></h2>
+            <h2> <strong id="new-index-title " class="content-title">Latest Reports</strong><br></h2>
             <?php $reports = json_decode($report, true); ?>
-                <?php foreach ($reports as $latest): ?>
-                    <div class="col-sm-2" id="latest-report-content">
-                        <a href="{{config('app.baseURL')}}/{{$latest['url']}}">
-                            <div class="latest-home-report col-sm-12" >
-                                <input type="hidden" value="7" name="id">
-                                <img src="{{config('app.baseURL')}}/storage/app/{{$latest['sub_category']['sub_category_image']}}" alt="{{$latest['sub_category']['sub_category_name']}}">
-                               <center> 
-                                    <span class="calibri">{{$latest['report_title']}}</span>
-                                </center>
-                            </div>
-                        </a>
-                    </div> 
-                <?php endforeach ?>
+            <?php foreach ($reports as $latest): ?>
+                <div class="col-sm-2" id="latest-report-content">
+                    <a href="{{config('app.baseURL')}}/{{$latest['url']}}">
+                        <div class="latest-home-report col-sm-12" >
+                            <input type="hidden" value="7" name="id">
+                            <img src="{{config('app.baseURL')}}/storage/app/{{$latest['sub_category_image']}}" alt="{{$latest['sub_category_name']}}">
+                            <center> 
+                                <span class="calibri">{{$latest['report_title']}}</span>
+                            </center>
+                        </div>
+                    </a>
+                </div> 
+            <?php endforeach ?>
         </div>
     </div>
 </div>

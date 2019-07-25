@@ -96,6 +96,7 @@ Route::get('/reports', 'PublicController@getReports');
 Route::get('/reportsData', 'PublicController@getReportsData');
 Route::post('reports', 'PublicController@postReports');
 Route::get('thank-you', 'ReportController@getThankyou');
+Route::get('reportsbreak', 'ReportController@ReportsBreak');
 
 
 //Euquiry Report

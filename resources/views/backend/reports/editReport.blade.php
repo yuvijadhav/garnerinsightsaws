@@ -1,3 +1,4 @@
+<?php // dd($report); ?>
 @extends('layouts.app')
 @section('content')
 <style>
@@ -11,7 +12,7 @@
         display: none;
     }
     h5{
-     position: inherit;      
+        position: inherit;      
     }
 </style>
 <div class="product-page-list bg-secondary section-space-bottom admin-top-margin">                
@@ -109,12 +110,7 @@
                                 <h4>No.of Pages</h4>
                             </div>
                             <div class="upload-info-field"> 
-                                <input class="profile-heading" value="{{$report->reportDetails['report_pages']}}" placeholder="Enter No. of pages ..." name="report_pages" type="text">
-                                <!-- @if ($errors->has('report_pages'))
-                                <span class="help-block">
-                                    <strong>{{ $errors->first('report_pages') }}</strong>
-                                </span>
-                                @endif -->
+                                <input class="profile-heading" value="{{$reportDetails->report_pages}}" placeholder="Enter No. of pages ..." name="report_pages" type="text">
                             </div>
                         </div>
                         <div class="form-group upload-info-item {{ $errors->has('url') ? ' has-error' : '' }}"> 
@@ -136,7 +132,7 @@
                             </div>
                             <div class="upload-info-field">
                                 <textarea class="form-control summernote-editor" rows="5" required="required" cols="50" style="text-align: left;" name="long_description">
-                                {{$report->reportDetails['long_description']}}
+                                {{$reportDetails->long_description}}
                                 </textarea>
                                 @if ($errors->has('long_description'))
                                 <span class="help-block">
@@ -151,7 +147,7 @@
                             </div>
                             <div class="upload-info-field">                                
                                 <textarea class="form-control summernote-editor" rows="5" required="required" cols="50" style="text-align: left;" name="long_content">
-                                {{$report->reportDetails['long_content']}}
+                                {{$reportDetails->long_content}}
                                 </textarea>
                                 @if ($errors->has('long_content'))
                                 <span class="help-block">
@@ -166,7 +162,7 @@
                             </div>
                             <div class="upload-info-field">                                
                                 <textarea class="form-control summernote-editor" rows="5" required="required" cols="50" style="text-align: left;" name="table_figures">
-                            {{$report->reportDetails['table_figures']}}
+                            {{$reportDetails->table_figures}}
                                 </textarea>
                                 @if ($errors->has('table_figures'))
                                 <span class="help-block">
@@ -196,7 +192,7 @@
                                 <h4>Single user price</h4>
                             </div>
                             <div class="upload-info-field"> 
-                                <input class="profile-heading" value="{{$report->reportDetails['single_price']}}" placeholder="Enter single user price..." name="single_price" type="text">
+                                <input class="profile-heading" value="{{$reportDetails->single_price}}" placeholder="Enter single user price..." name="single_price" type="text">
                                 @if ($errors->has('single_price'))
                                 <span class="help-block">
                                     <strong>{{ $errors->first('single_price') }}</strong>
@@ -209,7 +205,7 @@
                                 <h4>Multi user price</h4>
                             </div>
                             <div class="upload-info-field"> 
-                                <input class="profile-heading" value="{{$report->reportDetails['corporate_price']}}" placeholder="Enter single user price..." name="corporate_price" type="text">
+                                <input class="profile-heading" value="{{$reportDetails->corporate_price}}" placeholder="Enter single user price..." name="corporate_price" type="text">
                                 @if ($errors->has('corporate_price'))
                                 <span class="help-block">
                                     <strong>{{ $errors->first('corporate_price') }}</strong>
@@ -222,7 +218,7 @@
                                 <h4>Enterprise user price</h4>
                             </div>
                             <div class="upload-info-field"> 
-                                <input class="profile-heading" value="{{$report->reportDetails['enterprise_price']}}" placeholder="Enter single user price..." name="enterprise_price" type="text">
+                                <input class="profile-heading" value="{{$reportDetails->enterprise_price}}" placeholder="Enter single user price..." name="enterprise_price" type="text">
                                 @if ($errors->has('enterprise_price'))
                                 <span class="help-block">
                                     <strong>{{ $errors->first('enterprise_price') }}</strong>
@@ -237,7 +233,7 @@
                                 <h4>Meta Title <span>*</span></h4>
                             </div>
                             <div class="upload-info-field"> 
-                                <input class="profile-heading" value="{{$report->reportDetails['meta_title']}}" placeholder="Enter meta title..." name="meta_title" type="text">
+                                <input class="profile-heading" value="{{$reportDetails->meta_title}}" placeholder="Enter meta title..." name="meta_title" type="text">
                                 @if ($errors->has('meta_title'))
                                 <span class="help-block">
                                     <strong>{{ $errors->first('meta_title') }}</strong>
@@ -250,7 +246,7 @@
                                 <h4>Meta Keywords <span>*</span></h4>
                             </div>
                             <div class="upload-info-field"> 
-                                <input class="profile-heading" value="{{$report->reportDetails['meta_keywords']}}" placeholder="Enter meta keywords..." name="meta_keywords" type="text">
+                                <input class="profile-heading" value="{{$reportDetails->meta_keywords}}" placeholder="Enter meta keywords..." name="meta_keywords" type="text">
                                 @if ($errors->has('meta_keywords'))
                                 <span class="help-block">
                                     <strong>{{ $errors->first('meta_keywords') }}</strong>
@@ -263,7 +259,7 @@
                                 <h4>Meta Description <span>*</span></h4>
                             </div>
                             <div class="upload-info-field"> 
-                                <input class="profile-heading" value="{{$report->reportDetails['meta_description']}}" placeholder="Enter meta description..." name="meta_description" type="text">
+                                <input class="profile-heading" value="{{$reportDetails->meta_description}}" placeholder="Enter meta description..." name="meta_description" type="text">
                                 @if ($errors->has('meta_description'))
                                 <span class="help-block">
                                     <strong>{{ $errors->first('meta_description') }}</strong>
