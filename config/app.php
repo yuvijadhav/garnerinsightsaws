@@ -153,9 +153,9 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         //External
-        Laracasts\Flash\FlashServiceProvider::class,
-        Softon\Indipay\IndipayServiceProvider::class,
-        Maatwebsite\Excel\ExcelServiceProvider::class,
+//        Laracasts\Flash\FlashServiceProvider::class,
+//        Softon\Indipay\IndipayServiceProvider::class,
+//        Maatwebsite\Excel\ExcelServiceProvider::class,
     ],
     /*
       |--------------------------------------------------------------------------

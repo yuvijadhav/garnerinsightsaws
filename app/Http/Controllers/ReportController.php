@@ -1125,7 +1125,7 @@ class ReportController extends Controller {
         if ($repotdata) {
             foreach ($repotdata as $key => $val) {
                 $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->first();
-                if ($table->no_of_records >= 15000
+                if ($table->no_of_records >= 150000
                 ) {
                     $tbl = str_replace('report_', '', $table->tablename);
                     $tbl = $tbl + 1;
