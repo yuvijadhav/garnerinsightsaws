@@ -271,7 +271,11 @@ class PublicController extends Controller {
         $sub_categories = SubCategory::all();
         $data = Article::take(10)->orderBy('created_at', 'desc')->get();
         $total_count = Article::count();
-        $report = FrontReport::where('status', 1)->with("subCategory")->orderBy('report_id', 'desc')->take(10)->get();
+        $tbl = $this->getCurrentTable();
+        $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->orderBy('report_id', 'desc')->take(10)->get();
         return view('public.pressRelease')->with('data', $data)->with('total_count', $total_count)->with("report", $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
 
@@ -282,7 +286,6 @@ class PublicController extends Controller {
 
     public function getArticlesData(Request $request) {
         $post = $request->all();
-
         $page = $post['active_page'];
         $limit = $post['limit'];
         $total_count = Article::count();
@@ -326,13 +329,18 @@ class PublicController extends Controller {
      */
 
     public function getReports(Request $request) {
-        $sub_categories = SubCategory::all();
-//          $report = FrontReport::where('status', 1)->where("url", $url)->with("publisher")->with("subCategory")->with("region")->with("reportdetails")->first();
-        $data = FrontReport::where('status', 1)->take(10)->with('subCategory')->with('region')->orderBy('report_id', 'desc')->with("reportdetails")->get();
-        $categories = SubCategory::all();
+        $tbl = $this->getCurrentTable();
+        $data = DB::table($tbl)
+                ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                ->join('regions', 'regions.region_id', '=', $tbl . '.region_id')
+                ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                ->orderBy('report_id', 'desc');
+        $total_count = $data->count();
+        $data = $data->take(10)->get();
+        $sub_categories = $categories = SubCategory::all();
         $regions = Region::all();
 
-        $total_count = FrontReport::where('status', 1)->count();
+
         return view('public.reports')->with('data', $data)->with("categories", $categories)->with("regions", $regions)->with('total_count', $total_count)->with("sub_category_id", "0")->with("search", "")->with('sub_categories', $sub_categories);
     }
 
@@ -341,42 +349,17 @@ class PublicController extends Controller {
      * 
      */
 
-    //Ajax
-    public function getReportsData(Request $request) {
-        $sub_categories = SubCategory::all();
-        $post = $request->all();
-        $page = $post['active_page'];
-        $limit = $post['limit'];
-        $categories = $request->categories;
-        $regions = $request->regions;
-        $search = $request->search;
-        $reports = FrontReport::where('status', 1)->orderBy('report_id', 'desc');
-        if ($categories != "") {
-            $reports = $reports->whereIn("sub_category_id", $categories);
-        }
-        if ($regions != "") {
-            $reports = $reports->whereIn("region_id", $regions);
-        }
-        if ($search != "") {
-            $reports = $reports->where('report_title', 'like', "%" . $search . "%");
-        }
-        $total_count = $reports->count();
-        $reports = $reports->with('subCategory')->with('region')->with("reportdetails")->skip(($page - 1) * $limit)->take($limit)->get();
-        $data = array("total_count" => $total_count, "data" => $reports, "sub_categories" => $sub_categories);
-        return $data;
-    }
-
-    /*
-     * ================================ 
-     * 
-     */
-
     public function getCategories(Request $request) {
-        $sub_categories = SubCategory::all();
-        $data = SubCategory::all();
+//        $sub_categories = SubCategory::all();
+        $data = $sub_categories = SubCategory::all();
         $total_count = SubCategory::count();
-        $report = FrontReport::where('status', 1)->with('subCategory')->take(5)->get();
-        return view('public.category')->with('data', $data)->with('total_count', $total_count)->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
+        $tbl = $this->getCurrentTable();
+        $reports = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->join('regions', 'regions.region_id', '=', $tbl . '.region_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->orderBy('report_id', 'desc')->take(5)->get();
+        return view('public.category')->with('data', $data)->with('total_count', $total_count)->with('report', $reports)->with('search', '')->with('sub_categories', $sub_categories);
     }
 
     /*
@@ -610,7 +593,6 @@ class PublicController extends Controller {
      */
 
     public function getReportDetails($url) {
-//        dd($url);
         $sub_categories = SubCategory::all();
         if ($url != "null") {
 
@@ -624,27 +606,32 @@ class PublicController extends Controller {
             $report = array();
 //            $reportURLdata = DB::table('report')->where("url", trim($url))->first();
 //            dd($reportURLdata);
-            $report = FrontReport::where('status', 1)->where("url", trim($url))->with("publisher")->with("subCategory")->with("region")->with("reportdetails")->first();
+            $tbl = $this->getCurrentTable();
+            $tbl2 = "report_details" . str_replace("report", "", $tbl);
+            $report = DB::table($tbl)
+                            ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                            ->join('regions', 'regions.region_id', '=', $tbl . '.region_id')
+                            ->join('publishers', 'publishers.publisher_id', '=', $tbl . '.publisher_id')
+                            ->join($tbl2, $tbl2 . '.report_id', '=', $tbl . '.report_id')
+                            ->select($tbl2 . '.*', $tbl . '.report_title', $tbl . '.report_date', $tbl . '.url', 'sub_categories.sub_category_name', 'sub_categories.sub_category_description', 'sub_categories.sub_category_id', 'sub_categories.sub_category_image', 'regions.name as regions_name', 'publishers.publisher_name')
+                            ->where("url", $url)->orderBy('report_id', 'desc')->first();
 //            dd($report);
+//            $report = FrontReport::where('status', 1)->where("url", trim($url))->with("publisher")->with("subCategory")->with("region")->with("reportdetails")->first();
+//            dd($report);
+//            if (($report) != NULL) {
+//            $relatedReports = Report::where('status', 1)->where("sub_category_id", $report->sub_category_id)->where("report_id", "!=", $report->report_id)->with("publisher")->with("subCategory")->orderBy('report_id', 'desc')->take(2)->get();
+//                $relatedReports = FrontReport::where('status', 1)->where("sub_category_id", $report->sub_category_id)->with("publisher")->with("subCategory")->orderBy('report_id', 'desc')->take(2)->get();
+//                return view('report.reportDetailsData')->with('report', $report)->with('relatedReports', $relatedReports)->with('sub_categories', $sub_categories);
+//            } else {
+//                $report = Report::where('status', 1)->where("url", $url)->with("publisher")->with("subCategory")->with("region")->first();
             if (($report) != NULL) {
-//                $relatedReports = Report::where('status', 1)->where("sub_category_id", $report->sub_category_id)->where("report_id", "!=", $report->report_id)->with("publisher")->with("subCategory")->orderBy('report_id', 'desc')->take(2)->get();
+//                dd($report->sub_category_id);
                 $relatedReports = FrontReport::where('status', 1)->where("sub_category_id", $report->sub_category_id)->with("publisher")->with("subCategory")->orderBy('report_id', 'desc')->take(2)->get();
-                return view('report.reportDetailsData')->with('report', $report)->with('relatedReports', $relatedReports)->with('sub_categories', $sub_categories);
-            } else {
-
-                $report = Report::where('status', 1)->where("url", $url)->with("publisher")->with("subCategory")->with("region")->first();
-                if (($report) != NULL) {
-                    $relatedReports = FrontReport::where('status', 1)->where("sub_category_id", $report->sub_category_id)->with("publisher")->with("subCategory")->orderBy('report_id', 'desc')->take(2)->get();
 //                    $relatedReports = Report::where('status', 1)->where("sub_category_id", $report->sub_category_id)->where("report_id", "!=", $report->report_id)->with("publisher")->with("subCategory")->orderBy('report_id', 'desc')->take(2)->get();
-                    return view('report.reportDetails')->with('report', $report)->with('relatedReports', $relatedReports)->with('sub_categories', $sub_categories);
-                } else {
-                    return redirect('reports');
-                }
+                return view('report.reportDetails')->with('report', $report)->with('relatedReports', $relatedReports)->with('sub_categories', $sub_categories);
+            } else {
+                return redirect('reports');
             }
-//                $reportdetails = FrontReportdetail::where('status', 1)->where("url", $report->sub_category_id)->with("publisher")->with("subCategory")->with("region")->first();
-//            }
-        } else {
-            return redirect('reports');
         }
     }
 
@@ -673,7 +660,12 @@ class PublicController extends Controller {
         $article_id = $request->url;
         $article = Article::where("article_url", $article_id)->first();
         $relatedArticle = Article::where("article_id", "!=", $article->article_id)->take(5)->get();
-        $report = Report::where('status', 1)->with("subCategory")->orderBy('report_id', 'desc')->take(10)->get();
+        $tbl = $this->getCurrentTable();
+        $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+//                ->take(6)
+                        ->orderBy('report_id', 'desc')->take(10)->get();
         return view('article.pressReleaseDetails')->with('article', $article)->with('relatedArticle', $relatedArticle)->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
 
@@ -687,7 +679,11 @@ class PublicController extends Controller {
         $sub_category_id = $_GET['id'];
         $sub_category = SubCategory::where("sub_category_id", $sub_category_id)->first();
         $relatedCategory = SubCategory::where("sub_category_id", "!=", $sub_category->sub_category_id)->take(10)->get();
-        $report = Report::where('status', 1)->orderBy('report_id', 'desc')->take(10)->get();
+        $tbl = $this->getCurrentTable();
+        $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->orderBy('report_id', 'desc')->take(10)->get();
         return view('public.categoryDetails')->with('sub_category', $sub_category)->with('relatedCategory', $relatedCategory)->with('report', $report)->with('sub_categories', $sub_categories);
     }
 
@@ -710,8 +706,16 @@ class PublicController extends Controller {
         $sub_categories = SubCategory::all();
         $sub_category_id = $request->id;
         $search = $request->search;
-
-        $reports = FrontReport::where('status', 1)->with('subCategory')->with('region')->orderBy('report_id', 'desc');
+        $tbl = $this->getCurrentTable();
+        $reports = DB::table($tbl)
+                ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                ->join('regions', 'regions.region_id', '=', $tbl . '.region_id')
+                ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+//                ->take(6)
+                ->orderBy('report_id', 'desc');
+//                ->get();
+//        $reports = FrontReport::where('status', 1)->with('subCategory')->with('region')->orderBy('report_id', 'desc');
+//        dd($reports);
         if (isset($search)) {
             $reports = $reports->where('report_title', 'like', "%" . $search . "%");
         }
@@ -726,12 +730,51 @@ class PublicController extends Controller {
         }
         $total_count = $reports->count();
         $reports = $reports->take(10)->get();
-
-        $categories = SubCategory::all();
+//        dd($reports);
         $regions = Region::all();
 
 
-        return view('public.reports')->with('sub_category_id', $sub_category_id)->with('data', $reports)->with('categories', $categories)->with('regions', $regions)->with('total_count', $total_count)->with('search', $search)->with('sub_categories', $sub_categories);
+        return view('public.reports')->with('sub_category_id', $sub_category_id)->with('data', $reports)->with('categories', $sub_categories)->with('regions', $regions)->with('total_count', $total_count)->with('search', $search)->with('sub_categories', $sub_categories);
+    }
+
+    /*
+     * ================================ 
+     * 
+     */
+
+    //Ajax
+    public function getReportsData(Request $request) {
+        $sub_categories = SubCategory::all();
+        $post = $request->all();
+        $page = $post['active_page'];
+        $limit = $post['limit'];
+        $categories = $request->categories;
+        $regions = $request->regions;
+        $search = $request->search;
+        $table = DB::table('report_tables')->select('tablename', 'no_of_records')->where('status', 'inprogress')->first();
+//        $reports = FrontReport::where('status', 1)->orderBy('report_id', 'desc');
+        $tbl = $this->getCurrentTable();
+        $reports = DB::table($tbl)
+                ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+//                ->take(6)
+                ->orderBy('report_id', 'desc');
+        if ($categories != "") {
+            $reports = $reports->whereIn($tbl . ".sub_category_id", $categories);
+        }
+        if ($regions != "") {
+            $reports = $reports->whereIn($tbl . ".region_id", $regions);
+        }
+        if ($search != "") {
+            $reports = $reports->where($tbl . '.report_title', 'like', "%" . $search . "%");
+        }
+        $total_count = $reports->count();
+//        $reports = $reports->take(10)->get();
+        $reports = $reports->skip(($page - 1) * $limit)->take($limit)->get();
+//        return $reports;
+//        $reports = $reports->with('subCategory')->with('region')->with("reportdetails")->skip(($page - 1) * $limit)->take($limit)->get();
+        $data = array("total_count" => $total_count, "data" => $reports, "sub_categories" => $sub_categories);
+        return $data;
     }
 
     /*
@@ -742,16 +785,22 @@ class PublicController extends Controller {
     public function getCategory($url) {
         $category = SubCategory::where('sub_category_description', $url)->first();
         if ($category != "") {
-            $sub_categories = SubCategory::all();
+//            $sub_categories = SubCategory::all();
             $sub_category_id = $category->sub_category_id;
             $search = "";
-            $reports = FrontReport::where('status', 1)->with('subCategory')->with('region')->take(10)->orderBy('report_id', 'desc');
-            $reports = $reports->where('sub_category_id', $sub_category_id);
+            $tbl = $this->getCurrentTable();
+            $reports = DB::table($tbl)
+                    ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                    ->join('regions', 'regions.region_id', '=', $tbl . '.region_id')
+                    ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                    ->orderBy('report_id', 'desc');
+//            $reports = FrontReport::where('status', 1)->with('subCategory')->with('region')->take(10)->orderBy('report_id', 'desc');
+//            $reports = $reports->where('sub_category_id', $sub_category_id);
             $total_count = $reports->count();
             $reports = $reports->take(10)->get();
             $categories = SubCategory::all();
             $regions = Region::all();
-            return view('public.reports')->with('sub_category_id', $sub_category_id)->with('data', $reports)->with('categories', $categories)->with('regions', $regions)->with('total_count', $total_count)->with('search', $search)->with('sub_categories', $sub_categories);
+            return view('public.reports')->with('sub_category_id', $sub_category_id)->with('data', $reports)->with('categories', $categories)->with('regions', $regions)->with('total_count', $total_count)->with('search', $search)->with('sub_categories', $categories);
         } else {
             return redirect('reports');
         }
@@ -881,6 +930,16 @@ class PublicController extends Controller {
                 }
             }
         }
+    }
+
+    public function getCurrentTable() {
+        $table = DB::table('report_tables')->select('tablename', 'no_of_records')->where('status', 'inprogress')->first();
+        if ($table) {
+            $tbl = $table->tablename;
+        } else {
+            $tbl = "report_titles";
+        }
+        return$tbl;
     }
 
 }

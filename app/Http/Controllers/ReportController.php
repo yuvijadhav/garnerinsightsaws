@@ -29,30 +29,37 @@ class ReportController extends Controller {
             $search = $request->search;
             $data = $data->where('report_titles', 'like', "%" . $search . "%");
         }
-        if ($table->no_of_records) {
-            $data = DB::table($table->tablename)
-                    ->take(10)
-                    ->orderBy('report_id', 'desc')
-                    ->get();
-            $cnt = 10 - $data->count();
-            if ($cnt > 0) {
-                $tbl2 = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
-                $data = DB::table($tbl2)
-                        ->take($cnt)
+        if ($table) {
+            if ($table->no_of_records) {
+                $data = DB::table($table->tablename)
+                        ->take(10)
                         ->orderBy('report_id', 'desc')
                         ->get();
+                $cnt = 10 - $data->count();
+                if ($cnt > 0) {
+                    $tbl2 = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
+                    $data = DB::table($tbl2)
+                            ->take($cnt)
+                            ->orderBy('report_id', 'desc')
+                            ->get();
+                }
+                $total_count = $table->no_of_records;
+            } else {
+                $tbl2 = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
+                $data = DB::table($tbl2)
+                        ->take(10)
+                        ->orderBy('report_id', 'desc')
+                        ->get();
+                $total_count = DB::table($tbl2)->where('status', '1')->count();
             }
-            $total_count = $table->no_of_records;
         } else {
-            $tbl2 = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
-            $data = DB::table($tbl2)
+            $tbl = 'report';
+            $data = DB::table($tbl)
                     ->take(10)
                     ->orderBy('report_id', 'desc')
                     ->get();
-            $total_count = DB::table($tbl2)->where('status', '1')->count();
+            $total_count = DB::table($tbl)->where('status', '1')->count();
         }
-
-
         return view('backend.reports.allReports')->with('sub_categories', $sub_categories)->with('data', $data)->with('total_count', $total_count)->with('search', $search);
     }
 
@@ -116,6 +123,7 @@ class ReportController extends Controller {
      */
 
     public function postAddReport(Request $request) {
+        $max = $this->getPostMaxSize();
         $post = $request->all();
 //check which table is running in progress
         $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->first();
@@ -139,8 +147,8 @@ class ReportController extends Controller {
             } else {
                 $report->status = 0;
             }
-            //table space check 
-            if ($table->no_of_records >= 200000) {
+//table space check 
+            if ($table->no_of_records >= 100) {
                 $tbl = str_replace('report_', '', $table->tablename);
                 $tbl = $tbl + 1;
                 $tbl1 = 'report_' . $tbl;
@@ -158,11 +166,11 @@ class ReportController extends Controller {
                         ['tablename' => $tbl1, 'no_of_records' => 0, 'start' => $table_end, 'end' => $table_end]
                 );
                 $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->where('id', $tbl_id)->first();
-                // Insert records
+// Insert records
                 $id = $this->insertSingleReport($report, $table->tablename);
 
                 if ($id) {
-                    //Number of record increase 
+//Number of record increase 
                     $count = $table->no_of_records + 1;
                     DB::table('report_tables')
                             ->where('tablename', $table->tablename)
@@ -179,11 +187,11 @@ class ReportController extends Controller {
                     $this->reportsdetailsDB($id, $post, $tbl);
                 }
 
-                //End after Creating tables
+//End after Creating tables
             } else {
                 $id = $this->insertSingleReport($report, $table->tablename);
                 if ($id) {
-                    //Number of record increase 
+//Number of record increase 
                     $count = $table->no_of_records + 1;
                     DB::table('report_tables')
                             ->where('tablename', $table->tablename)
@@ -269,6 +277,97 @@ class ReportController extends Controller {
         return view('backend.reports.uploadFile');
     }
 
+    public function uploadsFilereporttable($sheet) {
+        foreach ($sheet as $row) {
+            $report_title = $row->title;
+            $exist = FrontReport::where('report_title', $report_title)->where('publisher_id', $row->publisher_id)->first();
+//                dd(substr($this->cleanNonAsciiCharactersInString($row->long_description), 0, 250));
+            if ($exist == null) {
+                if ($report_title != "") {
+                    if ($row->long_description != "") {
+                        $published_dates = explode(" ", $row->published_date);
+                        $published_date = $published_dates[0];
+                        $report = new FrontReport();
+
+                        $url = str_replace(" ", "-", $row->title);
+
+                        $url = preg_replace('#\s+#', '', trim($url));
+                        $url = str_replace("(", "", $url);
+                        $url = str_replace(")", "", $url);
+                        $url = str_replace("$", "", $url);
+                        $url = str_replace("&", "", $url);
+                        $url = str_replace("!", "", $url);
+                        $url = str_replace("@", "", $url);
+                        $url = str_replace("#", "", $url);
+                        $url = str_replace("%", "", $url);
+                        $url = str_replace("^", "", $url);
+                        $url = str_replace("*", "", $url);
+                        $url = str_replace(":", "", $url);
+                        $url = str_replace('"', "", $url);
+                        $url = str_replace("?", "", $url);
+                        $url = str_replace(">", "", $url);
+                        $url = str_replace("<", "", $url);
+                        $url = str_replace(",", "", $url);
+                        $url = str_replace(".", "", $url);
+                        $url = str_replace("/", "", $url);
+                        $url = str_replace("[", "", $url);
+                        $url = str_replace("]", "", $url);
+                        $url = str_replace("|", "", $url);
+                        $url = str_replace("}", "", $url);
+                        $url = str_replace("{", "", $url);
+                        $report->url = $url;
+                        if ($row->is_active == 1) {
+                            $report->status = 1;
+                        } else {
+                            $report->status = 0;
+                        }
+                        $report->report_title = $row->title;
+                        if ($row->category_id != "") {
+                            $report->sub_category_id = $row->category_id;
+                        } else {
+                            $report->sub_category_id = "15";
+                        }
+                        $report->publisher_id = $row->publisher_id;
+                        $report->region_id = $row->region_id;
+                        $report->report_date = $row->published_date;
+                        $report->short_description = substr($this->cleanNonAsciiCharactersInString($row->long_description), 0, 250);
+//                    $report->short_description = "";
+                        $report->save();
+                        if ($report->report_id) {
+                            $tbl = "report_details";
+//                            $i++;
+                            $this->reportsdetailsuploads($report->report_id, $row, $tbl);
+//                            flash('Report has been added successfully', 'success')->important();
+                        }
+                    }
+                } else {
+                    return;
+                    $report_id = $exist->report_id;
+                    if ($report_id) {
+                        $report = FrontReport::find($report_id);
+                        $report->report_date = $row->published_date;
+                        $report->short_description = substr($row->long_description, 0, 250);
+                        $report->save();
+
+                        $reportDetails = FrontReportdetail::where("report_id", $report_id)->first();
+                        $reportDetails->long_content = $row->content;
+                        $reportDetails->long_description = $row->long_description;
+                        $reportDetails->report_pages = $row->number_of_pages;
+                        $reportDetails->table_figures = $row->table_figures;
+                        $reportDetails->single_price = $row->single_user_price;
+                        $reportDetails->corporate_price = $row->multi_user_price;
+                        $reportDetails->enterprise_price = $row->enterprise_user_price;
+                        $reportDetails->meta_title = $row->meta_title;
+                        $reportDetails->meta_keywords = $row->meta_keywords;
+                        $reportDetails->meta_description = $row->meta_description;
+                        $reportDetails->save();
+                    }
+                    flash($report_title, "danger");
+                }
+            }
+        }
+    }
+
     /*
      * Function : postUploadFile
      * param    : Request $request
@@ -282,95 +381,37 @@ class ReportController extends Controller {
             $sheet = $reader->all();
             $sheetcount = count($sheet);
             $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->first();
-            $spaceleft = abs(520 - $table->no_of_records);
-
-            if ($spaceleft >= $sheetcount) {
-                foreach ($sheet as $row) {
-                    $report_title = $row->title;
-                    $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $report_title)->where('publisher_id', $row->publisher_id)->first();
-                    if ($exist == null) {
-                        if ($report_title != "" && $row->long_description != "") {
-                            $published_dates = explode(" ", $row->published_date);
-                            $published_date = $published_dates[0];
-                            $report = new FrontReport();
-                            $url = $this->getUrlTrims($row->title);
-                            $report->url = $url;
-                            if ($row->is_active == 1) {
-                                $report->status = 1;
-                            } else {
-                                $report->status = 0;
-                            }
-                            $report->report_title = $row->title;
-                            if ($row->category_id != "") {
-                                $report->sub_category_id = $row->category_id;
-                            } else {
-                                $report->sub_category_id = "15";
-                            }
-                            $report->publisher_id = $row->publisher_id;
-                            $report->region_id = $row->region_id;
-                            $report->report_date = $row->published_date;
-                            $report->short_description = substr($this->cleanNonAsciiCharactersInString($row->long_description), 0, 250);
-
-                            $id = $this->insertSingleReport($report, $table->tablename);
-
-                            if ($id) {
-                                $recordcount = DB::table('report_tables')->select('no_of_records')->where('tablename', $table->tablename)->first();
-                                $Rcount = $recordcount->no_of_records + 1;
-
-                                DB::table('report_titles')->insert([
-                                    'report_id' => $id,
-                                    'report_title' => $report->report_title,
-                                    'report_table' => $table->tablename,
-                                    'publisher_id' => $report->publisher_id
-                                ]);
-
-                                DB::table('report_tables')
-                                        ->where('tablename', $table->tablename)
-                                        ->update(['end' => $id, 'no_of_records' => $Rcount]);
-
-                                $tbl = str_replace('report_', 'report_details_', $table->tablename);
-                                $this->reportsdetailsuploads($id, $row, $tbl);
-                            }
-                        } else {
-                            return;
-//            If Title Exist in Table, Update Report Details Table
-                            flash($report_title, "danger");
-                        }
-                    } else {
-                        $this->reportExist($exist, $row);
-                    }
-                }
-            } else {
-
-                if ($spaceleft > 0) {
-                    for ($i = 0; $i < $spaceleft; $i++) {
-                        $report_title = $sheet[$i]['title'];
-                        $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $report_title)->where('publisher_id', $sheet[$i]['publisher_id'])->first();
+            if ($table) {
+                $spaceleft = abs(100 - $table->no_of_records); // {$spaceleft} number of space remain in inprogress table 
+                if ($spaceleft >= $sheetcount) {
+                    foreach ($sheet as $row) {
+                        $report_title = $row->title;
+                        $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $report_title)->where('publisher_id', $row->publisher_id)->first();
                         if ($exist == null) {
-                            if ($report_title != "" && $sheet[$i]['long_description'] != "") {
-
-                                $published_dates = explode(" ", $sheet[$i]['published_date']);
+                            if ($report_title != "" && $row->long_description != "") {
+                                $published_dates = explode(" ", $row->published_date);
                                 $published_date = $published_dates[0];
                                 $report = new FrontReport();
-                                $url = $this->getUrlTrims($sheet[$i]['title']);
+                                $url = $this->getUrlTrims($row->title);
                                 $report->url = $url;
-                                if ($sheet[$i]['is_active'] == 1) {
+                                if ($row->is_active == 1) {
                                     $report->status = 1;
                                 } else {
                                     $report->status = 0;
                                 }
-                                $report->report_title = $sheet[$i]['title'];
-                                if ($sheet[$i]['category_id'] != "") {
-                                    $report->sub_category_id = $sheet[$i]['category_id'];
+                                $report->report_title = $row->title;
+                                if ($row->category_id != "") {
+                                    $report->sub_category_id = $row->category_id;
                                 } else {
                                     $report->sub_category_id = "15";
                                 }
-                                $report->publisher_id = $sheet[$i]['publisher_id'];
-                                $report->region_id = $sheet[$i]['region_id'];
-                                $report->report_date = $sheet[$i]['published_date'];
-                                $report->short_description = substr($this->cleanNonAsciiCharactersInString($sheet[$i]['long_description']), 0, 250);
+                                $report->publisher_id = $row->publisher_id;
+                                $report->region_id = $row->region_id;
+                                $report->report_date = $row->published_date;
+                                $report->short_description = substr($this->cleanNonAsciiCharactersInString($row->long_description), 0, 250);
 
                                 $id = $this->insertSingleReport($report, $table->tablename);
+
                                 if ($id) {
                                     $recordcount = DB::table('report_tables')->select('no_of_records')->where('tablename', $table->tablename)->first();
                                     $Rcount = $recordcount->no_of_records + 1;
@@ -387,43 +428,25 @@ class ReportController extends Controller {
                                             ->update(['end' => $id, 'no_of_records' => $Rcount]);
 
                                     $tbl = str_replace('report_', 'report_details_', $table->tablename);
-                                    $this->reportsdetailsuploads($id, $sheet[$i], $tbl);
+                                    $this->reportsdetailsuploads($id, $row, $tbl);
                                 }
                             } else {
                                 return;
+//            If Title Exist in Table, Update Report Details Table
+                                flash($report_title, "danger");
                             }
                         } else {
-                            $this->reportExist($exist, $sheet[$i]);
+                            $this->reportExist($exist, $row);
                         }
                     }
-
-//After Full the space Create the Report table
-                    $limitrun = abs($sheetcount - $spaceleft);
-                    if ($limitrun > 0) {
-                        $tbl = str_replace('report_', '', $table->tablename);
-                        $tbl = $tbl + 1;
-                        $tbl1 = 'report_' . $tbl;
-                        $tbl2 = 'report_details_' . $tbl;
-                        $table_end = DB::table('report_tables')->select('end')->where('status', 'inprogress')->first();
-
-                        DB::table('report_tables')
-                                ->where('tablename', $table->tablename)
-                                ->update(['status' => 'completed']);
-                        $table_end = ($table_end->end) + 1;
-                        $sql1 = "CREATE TABLE `" . $tbl1 . "` ( `report_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_title` longtext COLLATE utf8mb4_unicode_ci NOT NULL, `sub_category_id` int(10) unsigned NOT NULL, `publisher_id` int(10) unsigned NOT NULL, `region_id` int(10) unsigned NOT NULL, `report_date` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `short_description` longtext COLLATE utf8mb4_unicode_ci, `url` longtext COLLATE utf8mb4_unicode_ci, `status` int(11) NOT NULL DEFAULT '1', `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`report_id`), KEY `report_sub_category_id_foreign` (`sub_category_id`), KEY `report_publisher_id_foreign` (`publisher_id`), KEY `report_region_id_foreign` (`region_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-                        $sql2 = "CREATE TABLE `" . $tbl2 . "` ( `id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_id` int(10) unsigned NOT NULL, `report_pages` int(11) DEFAULT NULL, `long_description` longtext COLLATE utf8mb4_unicode_ci, `long_content` longtext COLLATE utf8mb4_unicode_ci, `table_figures` longtext COLLATE utf8mb4_unicode_ci, `single_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `corporate_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `enterprise_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `meta_title` longtext COLLATE utf8mb4_unicode_ci, `meta_keywords` longtext COLLATE utf8mb4_unicode_ci, `meta_description` longtext COLLATE utf8mb4_unicode_ci, `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`id`), KEY `report_details_report_id_foreign` (`report_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-                        if (DB::statement($sql1)) {
-                            DB::statement($sql2);
-                        }
-                        $tbl_id = DB::table('report_tables')->insertGetId(
-                                ['tablename' => $tbl1, 'no_of_records' => 0, 'start' => $table_end, 'end' => $table_end]
-                        );
-                        $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->where('id', $tbl_id)->first();
-                        for ($i = $spaceleft; $i < $limitrun; $i++) {
+                } else {
+                    if ($spaceleft > 0) {
+                        for ($i = 0; $i < $spaceleft; $i++) {
                             $report_title = $sheet[$i]['title'];
                             $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $report_title)->where('publisher_id', $sheet[$i]['publisher_id'])->first();
                             if ($exist == null) {
                                 if ($report_title != "" && $sheet[$i]['long_description'] != "") {
+
                                     $published_dates = explode(" ", $sheet[$i]['published_date']);
                                     $published_date = $published_dates[0];
                                     $report = new FrontReport();
@@ -471,82 +494,163 @@ class ReportController extends Controller {
                                 $this->reportExist($exist, $sheet[$i]);
                             }
                         }
-                    }
-                } else {
-                    $tbl = str_replace('report_', '', $table->tablename);
-                    $tbl = $tbl + 1;
-                    $tbl1 = 'report_' . $tbl;
-                    $tbl2 = 'report_details_' . $tbl;
-                    $table_end = DB::table('report_tables')->select('end')->where('status', 'inprogress')->first();
 
-                    DB::table('report_tables')
-                            ->where('tablename', $table->tablename)
-                            ->update(['status' => 'completed']);
-                    $table_end = ($table_end->end) + 1;
-                    $sql1 = "CREATE TABLE `" . $tbl1 . "` ( `report_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_title` longtext COLLATE utf8mb4_unicode_ci NOT NULL, `sub_category_id` int(10) unsigned NOT NULL, `publisher_id` int(10) unsigned NOT NULL, `region_id` int(10) unsigned NOT NULL, `report_date` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `short_description` longtext COLLATE utf8mb4_unicode_ci, `url` longtext COLLATE utf8mb4_unicode_ci, `status` int(11) NOT NULL DEFAULT '1', `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`report_id`), KEY `report_sub_category_id_foreign` (`sub_category_id`), KEY `report_publisher_id_foreign` (`publisher_id`), KEY `report_region_id_foreign` (`region_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-                    $sql2 = "CREATE TABLE `" . $tbl2 . "` ( `id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_id` int(10) unsigned NOT NULL, `report_pages` int(11) DEFAULT NULL, `long_description` longtext COLLATE utf8mb4_unicode_ci, `long_content` longtext COLLATE utf8mb4_unicode_ci, `table_figures` longtext COLLATE utf8mb4_unicode_ci, `single_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `corporate_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `enterprise_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `meta_title` longtext COLLATE utf8mb4_unicode_ci, `meta_keywords` longtext COLLATE utf8mb4_unicode_ci, `meta_description` longtext COLLATE utf8mb4_unicode_ci, `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`id`), KEY `report_details_report_id_foreign` (`report_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-                    if (DB::statement($sql1)) {
-                        DB::statement($sql2);
-                    }
-                    $tbl_id = DB::table('report_tables')->insertGetId(
-                            ['tablename' => $tbl1, 'no_of_records' => 0, 'start' => $table_end, 'end' => $table_end]
-                    );
-                    $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->where('id', $tbl_id)->first();
-                    foreach ($sheet as $row) {
-                        $report_title = $row->title;
-                        $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $report_title)->where('publisher_id', $row->publisher_id)->first();
-                        if ($exist == null) {
-                            if ($report_title != "" && $row->long_description != "") {
+                        /*
+                         * After Full the space Create the Report table
+                         */
 
-                                $published_dates = explode(" ", $row->published_date);
-                                $published_date = $published_dates[0];
-                                $report = new FrontReport();
-                                $url = $this->getUrlTrims($row->title);
-                                $report->url = $url;
-                                if ($row->is_active == 1) {
-                                    $report->status = 1;
+                        $limitrun = abs($sheetcount - $spaceleft);
+                        if ($limitrun > 0) {
+                            $tbl = str_replace('report_', '', $table->tablename);
+                            $tbl = $tbl + 1;
+                            $tbl1 = 'report_' . $tbl;
+                            $tbl2 = 'report_details_' . $tbl;
+                            $table_end = DB::table('report_tables')->select('end')->where('status', 'inprogress')->first();
+
+                            DB::table('report_tables')
+                                    ->where('tablename', $table->tablename)
+                                    ->update(['status' => 'completed']);
+                            $table_end = ($table_end->end) + 1;
+                            $sql1 = "CREATE TABLE `" . $tbl1 . "` ( `report_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_title` longtext COLLATE utf8mb4_unicode_ci NOT NULL, `sub_category_id` int(10) unsigned NOT NULL, `publisher_id` int(10) unsigned NOT NULL, `region_id` int(10) unsigned NOT NULL, `report_date` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `short_description` longtext COLLATE utf8mb4_unicode_ci, `url` longtext COLLATE utf8mb4_unicode_ci, `status` int(11) NOT NULL DEFAULT '1', `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`report_id`), KEY `report_sub_category_id_foreign` (`sub_category_id`), KEY `report_publisher_id_foreign` (`publisher_id`), KEY `report_region_id_foreign` (`region_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+                            $sql2 = "CREATE TABLE `" . $tbl2 . "` ( `id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_id` int(10) unsigned NOT NULL, `report_pages` int(11) DEFAULT NULL, `long_description` longtext COLLATE utf8mb4_unicode_ci, `long_content` longtext COLLATE utf8mb4_unicode_ci, `table_figures` longtext COLLATE utf8mb4_unicode_ci, `single_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `corporate_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `enterprise_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `meta_title` longtext COLLATE utf8mb4_unicode_ci, `meta_keywords` longtext COLLATE utf8mb4_unicode_ci, `meta_description` longtext COLLATE utf8mb4_unicode_ci, `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`id`), KEY `report_details_report_id_foreign` (`report_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+                            if (DB::statement($sql1)) {
+                                DB::statement($sql2);
+                            }
+                            $tbl_id = DB::table('report_tables')->insertGetId(
+                                    ['tablename' => $tbl1, 'no_of_records' => 0, 'start' => $table_end, 'end' => $table_end]
+                            );
+                            $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->where('id', $tbl_id)->first();
+                            for ($i = $spaceleft; $i < $limitrun; $i++) {
+                                $report_title = $sheet[$i]['title'];
+                                $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $report_title)->where('publisher_id', $sheet[$i]['publisher_id'])->first();
+                                if ($exist == null) {
+                                    if ($report_title != "" && $sheet[$i]['long_description'] != "") {
+                                        $published_dates = explode(" ", $sheet[$i]['published_date']);
+                                        $published_date = $published_dates[0];
+                                        $report = new FrontReport();
+                                        $url = $this->getUrlTrims($sheet[$i]['title']);
+                                        $report->url = $url;
+                                        if ($sheet[$i]['is_active'] == 1) {
+                                            $report->status = 1;
+                                        } else {
+                                            $report->status = 0;
+                                        }
+                                        $report->report_title = $sheet[$i]['title'];
+                                        if ($sheet[$i]['category_id'] != "") {
+                                            $report->sub_category_id = $sheet[$i]['category_id'];
+                                        } else {
+                                            $report->sub_category_id = "15";
+                                        }
+                                        $report->publisher_id = $sheet[$i]['publisher_id'];
+                                        $report->region_id = $sheet[$i]['region_id'];
+                                        $report->report_date = $sheet[$i]['published_date'];
+                                        $report->short_description = substr($this->cleanNonAsciiCharactersInString($sheet[$i]['long_description']), 0, 250);
+
+                                        $id = $this->insertSingleReport($report, $table->tablename);
+                                        if ($id) {
+                                            $recordcount = DB::table('report_tables')->select('no_of_records')->where('tablename', $table->tablename)->first();
+                                            $Rcount = $recordcount->no_of_records + 1;
+
+                                            DB::table('report_titles')->insert([
+                                                'report_id' => $id,
+                                                'report_title' => $report->report_title,
+                                                'report_table' => $table->tablename,
+                                                'publisher_id' => $report->publisher_id
+                                            ]);
+
+                                            DB::table('report_tables')
+                                                    ->where('tablename', $table->tablename)
+                                                    ->update(['end' => $id, 'no_of_records' => $Rcount]);
+
+                                            $tbl = str_replace('report_', 'report_details_', $table->tablename);
+                                            $this->reportsdetailsuploads($id, $sheet[$i], $tbl);
+                                        }
+                                    } else {
+                                        return;
+                                    }
                                 } else {
-                                    $report->status = 0;
+                                    $this->reportExist($exist, $sheet[$i]);
                                 }
-                                $report->report_title = $row->title;
-                                if ($row->category_id != "") {
-                                    $report->sub_category_id = $row->category_id;
+                            }
+                        }
+                    } else {
+                        $tbl = str_replace('report_', '', $table->tablename);
+                        $tbl = $tbl + 1;
+                        $tbl1 = 'report_' . $tbl;
+                        $tbl2 = 'report_details_' . $tbl;
+                        $table_end = DB::table('report_tables')->select('end')->where('status', 'inprogress')->first();
+
+                        DB::table('report_tables')
+                                ->where('tablename', $table->tablename)
+                                ->update(['status' => 'completed']);
+                        $table_end = ($table_end->end) + 1;
+                        $sql1 = "CREATE TABLE `" . $tbl1 . "` ( `report_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_title` longtext COLLATE utf8mb4_unicode_ci NOT NULL, `sub_category_id` int(10) unsigned NOT NULL, `publisher_id` int(10) unsigned NOT NULL, `region_id` int(10) unsigned NOT NULL, `report_date` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `short_description` longtext COLLATE utf8mb4_unicode_ci, `url` longtext COLLATE utf8mb4_unicode_ci, `status` int(11) NOT NULL DEFAULT '1', `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`report_id`), KEY `report_sub_category_id_foreign` (`sub_category_id`), KEY `report_publisher_id_foreign` (`publisher_id`), KEY `report_region_id_foreign` (`region_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+                        $sql2 = "CREATE TABLE `" . $tbl2 . "` ( `id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_id` int(10) unsigned NOT NULL, `report_pages` int(11) DEFAULT NULL, `long_description` longtext COLLATE utf8mb4_unicode_ci, `long_content` longtext COLLATE utf8mb4_unicode_ci, `table_figures` longtext COLLATE utf8mb4_unicode_ci, `single_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `corporate_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `enterprise_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `meta_title` longtext COLLATE utf8mb4_unicode_ci, `meta_keywords` longtext COLLATE utf8mb4_unicode_ci, `meta_description` longtext COLLATE utf8mb4_unicode_ci, `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`id`), KEY `report_details_report_id_foreign` (`report_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+                        if (DB::statement($sql1)) {
+                            DB::statement($sql2);
+                        }
+                        $tbl_id = DB::table('report_tables')->insertGetId(
+                                ['tablename' => $tbl1, 'no_of_records' => 0, 'start' => $table_end, 'end' => $table_end]
+                        );
+                        $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->where('id', $tbl_id)->first();
+                        foreach ($sheet as $row) {
+                            $report_title = $row->title;
+                            $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $report_title)->where('publisher_id', $row->publisher_id)->first();
+                            if ($exist == null) {
+                                if ($report_title != "" && $row->long_description != "") {
+
+                                    $published_dates = explode(" ", $row->published_date);
+                                    $published_date = $published_dates[0];
+                                    $report = new FrontReport();
+                                    $url = $this->getUrlTrims($row->title);
+                                    $report->url = $url;
+                                    if ($row->is_active == 1) {
+                                        $report->status = 1;
+                                    } else {
+                                        $report->status = 0;
+                                    }
+                                    $report->report_title = $row->title;
+                                    if ($row->category_id != "") {
+                                        $report->sub_category_id = $row->category_id;
+                                    } else {
+                                        $report->sub_category_id = "15";
+                                    }
+                                    $report->publisher_id = $row->publisher_id;
+                                    $report->region_id = $row->region_id;
+                                    $report->report_date = $row->published_date;
+                                    $report->short_description = substr($this->cleanNonAsciiCharactersInString($row->long_description), 0, 250);
+
+                                    $id = $this->insertSingleReport($report, $table->tablename);
+
+                                    if ($id) {
+                                        $recordcount = DB::table('report_tables')->select('no_of_records')->where('tablename', $table->tablename)->first();
+                                        $Rcount = $recordcount->no_of_records + 1;
+
+                                        DB::table('report_titles')->insert([
+                                            'report_id' => $id,
+                                            'report_title' => $report->report_title,
+                                            'report_table' => $table->tablename,
+                                            'publisher_id' => $report->publisher_id
+                                        ]);
+
+                                        DB::table('report_tables')
+                                                ->where('tablename', $table->tablename)
+                                                ->update(['end' => $id, 'no_of_records' => $Rcount]);
+
+                                        $tbl = str_replace('report_', 'report_details_', $table->tablename);
+                                        $this->reportsdetailsuploads($id, $row, $tbl);
+                                    }
                                 } else {
-                                    $report->sub_category_id = "15";
-                                }
-                                $report->publisher_id = $row->publisher_id;
-                                $report->region_id = $row->region_id;
-                                $report->report_date = $row->published_date;
-                                $report->short_description = substr($this->cleanNonAsciiCharactersInString($row->long_description), 0, 250);
-
-                                $id = $this->insertSingleReport($report, $table->tablename);
-
-                                if ($id) {
-                                    $recordcount = DB::table('report_tables')->select('no_of_records')->where('tablename', $table->tablename)->first();
-                                    $Rcount = $recordcount->no_of_records + 1;
-
-                                    DB::table('report_titles')->insert([
-                                        'report_id' => $id,
-                                        'report_title' => $report->report_title,
-                                        'report_table' => $table->tablename,
-                                        'publisher_id' => $report->publisher_id
-                                    ]);
-
-                                    DB::table('report_tables')
-                                            ->where('tablename', $table->tablename)
-                                            ->update(['end' => $id, 'no_of_records' => $Rcount]);
-
-                                    $tbl = str_replace('report_', 'report_details_', $table->tablename);
-                                    $this->reportsdetailsuploads($id, $row, $tbl);
+                                    return;
                                 }
                             } else {
-                                return;
+                                $this->reportExist($exist, $row);
                             }
-                        } else {
-                            $this->reportExist($exist, $row);
                         }
                     }
                 }
+            } else {
+                $this->uploadsFilereporttable($sheet);
             }
         });
         return redirect('allReports');
@@ -987,6 +1091,102 @@ class ReportController extends Controller {
         return $text;
     }
 
+    public function getlivedata($offset, $limit) {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "http://garnerinsights.com/api/reportdata/" . $offset . "/" . $limit,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_TIMEOUT => 300000,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_HTTPHEADER => array(
+// Set Here Your Requesred Headers
+                'Content-Type: application/json',
+            ),
+        ));
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        curl_close($curl);
+
+        if ($err) {
+            echo "cURL Error #:" . $err;
+        } else {
+            return json_decode($response);
+//            dd(json_decode($response));
+        }
+    }
+
+    public function reportoptimization($limit) {
+        $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->first();
+        $offset = $table->end;
+        $repotdata = $this->getlivedata($offset, $limit);
+        if ($repotdata) {
+            foreach ($repotdata as $key => $val) {
+                $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->first();
+                if ($table->no_of_records >= 15000
+                ) {
+                    $tbl = str_replace('report_', '', $table->tablename);
+                    $tbl = $tbl + 1;
+                    $tbl1 = 'report_' . $tbl;
+                    $tbl2 = 'report_details_' . $tbl;
+                    DB::table('report_tables')
+                            ->where('tablename', $table->tablename)
+                            ->update(['status' => 'completed']);
+                    $table_end = ($table->end) + 1;
+                    $sql1 = "CREATE TABLE `" . $tbl1 . "` ( `report_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_title` longtext COLLATE utf8mb4_unicode_ci NOT NULL, `sub_category_id` int(10) unsigned NOT NULL, `publisher_id` int(10) unsigned NOT NULL, `region_id` int(10) unsigned NOT NULL, `report_date` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `short_description` longtext COLLATE utf8mb4_unicode_ci, `url` longtext COLLATE utf8mb4_unicode_ci, `status` int(11) NOT NULL DEFAULT '1', `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`report_id`), KEY `report_sub_category_id_foreign` (`sub_category_id`), KEY `report_publisher_id_foreign` (`publisher_id`), KEY `report_region_id_foreign` (`region_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+                    $sql2 = "CREATE TABLE `" . $tbl2 . "` ( `id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_id` int(10) unsigned NOT NULL, `report_pages` int(11) DEFAULT NULL, `long_description` longtext COLLATE utf8mb4_unicode_ci, `long_content` longtext COLLATE utf8mb4_unicode_ci, `table_figures` longtext COLLATE utf8mb4_unicode_ci, `single_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `corporate_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `enterprise_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `meta_title` longtext COLLATE utf8mb4_unicode_ci, `meta_keywords` longtext COLLATE utf8mb4_unicode_ci, `meta_description` longtext COLLATE utf8mb4_unicode_ci, `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`id`), KEY `report_details_report_id_foreign` (`report_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+                    if (DB::statement($sql1)) {
+                        DB::statement($sql2);
+                    }
+                    $tbl_id = DB::table('report_tables')->insertGetId(
+                            ['tablename' => $tbl1, 'no_of_records' => 0, 'start' => $table_end, 'end' => $table_end, 'status' => 'inprogress']
+                    );
+                    $table = DB::table('report_tables')->select('tablename', 'no_of_records', 'start', 'end', 'status')->where('status', 'inprogress')->first();
+                    $val->short_description = substr($this->cleanNonAsciiCharactersInString($val->long_description), 0, 250);
+                    $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $val->report_title)->where('publisher_id', $val->publisher_id)->first();
+                    if ($exist == null) {
+                        $this->insertSingleReportBreak($val, $table->tablename);
+                        $count = $table->no_of_records + 1;
+                        DB::table('report_tables')
+                                ->where('tablename', $table->tablename)
+                                ->update(['end' => $val->report_id, 'no_of_records' => $count]);
+                        DB::table('report_titles')->insert([
+                            'report_id' => $val->report_id,
+                            'report_title' => $val->report_title,
+                            'report_table' => $table->tablename,
+                            'publisher_id' => $val->publisher_id
+                        ]);
+                        $tbl = str_replace('report_', 'report_details_', $table->tablename);
+                        $this->reportsdetailsBreak($val, $tbl);
+                    }
+                } else {
+                    $exist = DB::table('report_titles')->select('report_id', 'report_table')->where('report_title', $val->report_title)->where('publisher_id', $val->publisher_id)->first();
+                    if ($exist == null) {
+                        $val->short_description = substr($this->cleanNonAsciiCharactersInString($val->long_description), 0, 250);
+                        $this->insertSingleReportBreak($val, $table->tablename);
+                        $count = $table->no_of_records + 1;
+
+                        $tbl = str_replace('report_', '', $table->tablename);
+                        DB::table('report_titles')->insert([
+                            'report_id' => $val->report_id,
+                            'report_title' => $val->report_title,
+                            'report_table' => $table->tablename,
+                            'publisher_id' => $val->publisher_id
+                        ]);
+                        DB::table('report_tables')
+                                ->where('tablename', $table->tablename)
+                                ->update(['end' => $val->report_id, 'no_of_records' => $count]);
+                        $tbl = str_replace('report_', 'report_details_', $table->tablename);
+                        $this->reportsdetailsBreak($val, $tbl);
+                    }
+//                    dd(__LINE__);
+                }
+            }
+        }
+    }
+
     public function ReportsBreak() {
         $limit = 100000;
 
@@ -1013,7 +1213,7 @@ class ReportController extends Controller {
                     foreach ($data as $row) {
                         $row->short_description = substr($this->cleanNonAsciiCharactersInString($row->long_description), 0, 250);
                         $this->insertSingleReportBreak($row, $table->tablename);
-                        //Number of record increase 
+//Number of record increase 
                         $count = $table->no_of_records + 1;
                         DB::table('report_tables')
                                 ->where('tablename', $table->tablename)
@@ -1066,6 +1266,16 @@ class ReportController extends Controller {
             'created_at' => $rarray->created_at,
             'updated_at' => $rarray->updated_at
         ]);
+    }
+
+    public function createTables($t1, $table_end) {
+        $tbl1 = "report_" . $t1;
+        $tbl2 = "report_details_" . $t1;
+        $sql1 = "CREATE TABLE `" . $tbl1 . "` ( `report_id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_title` longtext COLLATE utf8mb4_unicode_ci NOT NULL, `sub_category_id` int(10) unsigned NOT NULL, `publisher_id` int(10) unsigned NOT NULL, `region_id` int(10) unsigned NOT NULL, `report_date` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `short_description` longtext COLLATE utf8mb4_unicode_ci, `url` longtext COLLATE utf8mb4_unicode_ci, `status` int(11) NOT NULL DEFAULT '1', `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`report_id`), KEY `report_sub_category_id_foreign` (`sub_category_id`), KEY `report_publisher_id_foreign` (`publisher_id`), KEY `report_region_id_foreign` (`region_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        $sql2 = "CREATE TABLE `" . $tbl2 . "` ( `id` int(10) unsigned NOT NULL AUTO_INCREMENT, `report_id` int(10) unsigned NOT NULL, `report_pages` int(11) DEFAULT NULL, `long_description` longtext COLLATE utf8mb4_unicode_ci, `long_content` longtext COLLATE utf8mb4_unicode_ci, `table_figures` longtext COLLATE utf8mb4_unicode_ci, `single_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `corporate_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `enterprise_price` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `meta_title` longtext COLLATE utf8mb4_unicode_ci, `meta_keywords` longtext COLLATE utf8mb4_unicode_ci, `meta_description` longtext COLLATE utf8mb4_unicode_ci, `created_at` timestamp NULL DEFAULT NULL, `updated_at` timestamp NULL DEFAULT NULL, PRIMARY KEY (`id`), KEY `report_details_report_id_foreign` (`report_id`) ) ENGINE=InnoDB AUTO_INCREMENT=" . $table_end . " DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        if (DB::statement($sql1)) {
+            DB::statement($sql2);
+        }
     }
 
 }

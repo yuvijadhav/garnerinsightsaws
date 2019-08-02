@@ -131,8 +131,7 @@ class RndController extends Controller {
      * 
      */
 
-    public function getlivedata($offset, $limit) {
-
+    public function getlivedataold($offset, $limit) {
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
@@ -154,8 +153,8 @@ class RndController extends Controller {
         if ($err) {
             echo "cURL Error #:" . $err;
         } else {
-            return json_decode($response);
-//            print_r(json_decode($response));
+//            return json_decode($response);
+            print_r(json_decode($response));
         }
     }
 

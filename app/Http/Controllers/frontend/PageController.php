@@ -17,24 +17,72 @@ class PageController extends Controller {
     public function getHome() {
         $sub_categories = SubCategory::all();
         $table = DB::table('report_tables')->select('tablename', 'no_of_records')->where('status', 'inprogress')->first();
-        $tbl = $table->tablename;
-        if ($table->no_of_records) {
-            $report = DB::table($tbl)
-                    ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
-                    ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
-                    ->take(6)
-                    ->orderBy('report_id', 'desc')
-                    ->get();
+        if ($table) {
+            $tbl = $table->tablename;
+            if ($table->no_of_records) {
+                $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->take(6)
+                        ->orderBy('report_id', 'desc')
+                        ->get();
+            } else {
+                $tbl = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
+                $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->take(6)
+                        ->orderBy('report_id', 'desc')
+                        ->get();
+            }
+            return view("Frontend.index")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
         } else {
-            $tbl = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
+            $report = array();
+            $tbl = 'report';
             $report = DB::table($tbl)
                     ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
                     ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
                     ->take(6)
                     ->orderBy('report_id', 'desc')
                     ->get();
+            return view("Frontend.index")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
         }
-        return view("Frontend.index")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
+    }
+
+    public function getHomeold() {
+        $sub_categories = SubCategory::all();
+        $table = DB::table('report_tables')->select('tablename', 'no_of_records')->where('status', 'inprogress')->first();
+        if ($table) {
+            $tbl = $table->tablename;
+            if ($table->no_of_records) {
+                $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->take(6)
+                        ->orderBy('report_id', 'desc')
+                        ->get();
+                dd($report);
+            } else {
+                $tbl = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
+                $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->take(6)
+                        ->orderBy('report_id', 'desc')
+                        ->get();
+            }
+            return view("Frontend.index")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
+        } else {
+            $report = array();
+            $tbl = 'report';
+            $report = DB::table($tbl)
+                    ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                    ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                    ->take(6)
+                    ->orderBy('report_id', 'desc')
+                    ->get();
+            return view("Frontend.index")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
+        }
     }
 
     /*
@@ -125,24 +173,28 @@ class PageController extends Controller {
     public function getServices() {
         $sub_categories = SubCategory::all();
         $table = DB::table('report_tables')->select('tablename', 'no_of_records')->where('status', 'inprogress')->first();
-        $tbl = $table->tablename;
-        if ($table->no_of_records) {
-            $report = DB::table($tbl)
-                    ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
-                    ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
-                    ->take(5)
-                    ->orderBy('report_id', 'desc')
-                    ->get();
+        if ($table) {
+            $tbl = $table->tablename;
+            if ($table->no_of_records) {
+                $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->take(5)
+                        ->orderBy('report_id', 'desc')
+                        ->get();
+            } else {
+                $tbl = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
+                $report = DB::table($tbl)
+                        ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
+                        ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
+                        ->take(5)
+                        ->orderBy('report_id', 'desc')
+                        ->get();
+            }
+            return view("Frontend.services")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
         } else {
-            $tbl = 'report_' . (str_replace('report_', '', $table->tablename) - 1);
-            $report = DB::table($tbl)
-                    ->join('sub_categories', 'sub_categories.sub_category_id', '=', $tbl . '.sub_category_id')
-                    ->select($tbl . '.*', 'sub_categories.sub_category_name', 'sub_categories.sub_category_image')
-                    ->take(5)
-                    ->orderBy('report_id', 'desc')
-                    ->get();
+            
         }
-        return view("Frontend.services")->with('report', $report)->with('search', '')->with('sub_categories', $sub_categories);
     }
 
     /*

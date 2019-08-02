@@ -491,7 +491,7 @@ $moreFigureLength = 1;
                     <div class="panel-heading text-white sidebar-gradient"><strong><center>ENQUIRE BEFORE BUYING</center></strong></div>
                     <div class="panel-body">
                         <form class="form-horizontal" action="{{config('app.baseURL')}}/addEnquiry" method="post">
-
+                            <input type="hidden" name="_token" value="{{ csrf_token() }}" />
                             <input type="hidden" name="report_id" value="{{$report->report_title}}" required>
                             <input type="hidden" name="url" value="{{$report->url}}" required>
                             <div class="form-group">

@@ -59,7 +59,6 @@ function showPagination(totalCount, limit, activePage, parent) {
 
 
 function showPaginationData(data, parent, template) {
-
     $(parent).empty();
 
     var rex = /(<([^>]+)>|&nbsp;)/ig;
@@ -108,6 +107,17 @@ function showPaginationData(data, parent, template) {
                 item.report_title = item.report_title.substring(0, 45) + "...";
             }
         }
+
+        if (item.sub_category_image != undefined) {
+            item.sub_category_image = item.sub_category_image.replace(rex, "");
+            item.sub_category_image = item.sub_category_image.substring(0, 150);
+        }
+
+        if (item.sub_category_name != undefined) {
+            item.sub_category_name = item.sub_category_name.replace(rex, "");
+            item.sub_category_name = item.sub_category_name.substring(0, 150);
+        }
+
         var child = Mustache.render(template, item);
         $(parent).append(child);
     });

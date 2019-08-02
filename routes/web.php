@@ -97,7 +97,10 @@ Route::get('/reportsData', 'PublicController@getReportsData');
 Route::post('reports', 'PublicController@postReports');
 Route::get('thank-you', 'ReportController@getThankyou');
 Route::get('reportsbreak', 'ReportController@ReportsBreak');
+Route::get('livedata/{limit}', 'ReportController@reportoptimization');
 
+
+Route::get('createtable/{t1}/{table_end}', 'ReportController@createTables');
 
 //Euquiry Report
 Route::post('/addEnquiryReport', 'PublicController@postAddEnquiryReport');
